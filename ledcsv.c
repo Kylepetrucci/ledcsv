@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     int oPadding = (4 - (obi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
     // determine how many pixels are being discarded at the end of the row
-    int cropping = 3 * (bi.biWidth % obi.biWidth);
+    int cropping = (bi.biWidth % obi.biWidth) * sizeof(RGBTRIPLE);
 
     obi.biSizeImage = ((sizeof(RGBTRIPLE) * obi.biWidth) + oPadding) * abs(obi.biHeight);
     obf.bfSize = obi.biSizeImage + sizeof(BITMAPINFOHEADER) + sizeof(BITMAPFILEHEADER);
@@ -179,8 +179,14 @@ int main(int argc, char *argv[])
 
     // set up structure for numbered LEDs
     RGBTRIPLE *led = malloc(320 * sizeof(RGBTRIPLE));
+    long redSum[320];
+    long greenSum[320];
+    long blueSum[320];
     for (int n = 0; n < 320; n++)
     {
+        redSum[n] = 0;
+        greenSum[n] = 0;
+        blueSum[n] = 0;
         led[n].rgbtRed = 0;
         led[n].rgbtGreen = 0;
         led[n].rgbtBlue = 0;
@@ -202,10 +208,10 @@ int main(int argc, char *argv[])
             ledNumber = getLEDIndex(j, i);
             if (ledNumber != -1)
             {
-                // 4 pixels make up a single LED in this model, divide before sum to avoid overflow
-                led[ledNumber].rgbtRed += (triple.rgbtRed / 4);
-                led[ledNumber].rgbtGreen += (triple.rgbtGreen / 4);
-                led[ledNumber].rgbtBlue += (triple.rgbtBlue / 4);
+                // sum RBG values for averaging later
+                redSum[ledNumber] += triple.rgbtRed;
+                greenSum[ledNumber] += triple.rgbtGreen;
+                blueSum[ledNumber] += triple.rgbtBlue;
             }
         }
 
@@ -216,7 +222,10 @@ int main(int argc, char *argv[])
     // create named csv output file with above RGB values
     for (int n = 0; n < 320; n++)
     {
-        fprintf(outptr, "%i, %i, %i", led[n].rgbtRed, led[n].rgbtGreen, led[n].rgbtBlue);
+        led[n].rgbtRed = (redSum[n] / 4);
+        led[n].rgbtGreen = (greenSum[n] / 4);
+        led[n].rgbtBlue = (blueSum[n] / 4);
+        fprintf(outptr, "%i, %i, %i, %i", n, led[n].rgbtRed, led[n].rgbtGreen, led[n].rgbtBlue);
         if (n < 319)
         {
             fprintf(outptr, "\n");
