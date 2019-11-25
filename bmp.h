@@ -1,7 +1,6 @@
-// BMP-related data types based on Microsoft's own
-
 #include <stdint.h>
 
+// BMP-related data types based on Microsoft's own
 // aliases for C/C++ primitive data types
 // https://msdn.microsoft.com/en-us/library/cc230309.aspx
 typedef uint8_t  BYTE;
