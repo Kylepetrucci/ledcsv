@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
     int ledNumber;
 
     // iterate over scaled file's scanlines
-    for (int i = 0; i < obi.biHeight; i++)
+    for (int i = obi.biHeight - 1; i >= 0; i--)
     {
         // iterate over pixels in scanline
         for (int j = 0; j < obi.biWidth; j++)
